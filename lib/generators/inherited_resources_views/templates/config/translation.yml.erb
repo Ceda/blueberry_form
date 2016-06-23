@@ -1,0 +1,30 @@
+cs:
+  admin:
+    <%= "#{plural_table_name}" %>:
+      edit:
+        back: "zpět"
+        edit: "Úprava položky"
+      empty:
+        <%= "no_#{plural_table_name}" %>: "Nenalezeny žádné položky."
+      form:
+        main: "Hlavní informace"
+      index:
+        create: "Vytvořit položku"
+        list: "Seznam položek"
+      new:
+        back: "zpět"
+        create: "Vytvořit položku"
+
+cs:
+  activerecord:
+    attributes:
+      <%= "#{singular_table_name}" %>:
+        <%- for attribute in attributes -%>
+        <%= "#{attribute.type}" %>: "<%= "#{attribute.type.upcase}" %>"
+        <%- end -%>
+        created_at: "Vytvořeno"
+
+    models:
+      <%= "#{singular_table_name}" %>:
+        one: "<%= "#{singular_table_name}" %>"
+        other: "<%= "#{plural_table_name}" %>"

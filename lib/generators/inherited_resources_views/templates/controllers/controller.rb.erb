@@ -1,0 +1,26 @@
+<% module_namespacing do -%>
+module Admin
+  class <%= controller_class_name %>Controller < <%= parent_controller_class_name %>Controller
+    include InheritedResourcesController
+
+    private
+
+    def <%= "#{singular_table_name}_params" %>
+      <%- if attributes_names.empty? -%>
+      params[<%= ":#{singular_table_name}" %>]
+      <%- else -%>
+      params
+        .require(<%= ":#{singular_table_name}" %>)
+        .permit(<%= attributes.map { |attribute| ":#{attribute.type}" }.join(', ') %>)
+      <%- end -%>
+    end
+
+    def collection
+      <%= "@#{plural_table_name}_params" %> ||= end_of_association_chain
+        .page(params[:page])
+        .per(10)
+        .decorate
+    end
+  end
+end
+<% end -%>

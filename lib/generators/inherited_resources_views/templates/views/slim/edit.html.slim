@@ -1,0 +1,17 @@
+= simple_form_for [:admin, resource] do |f|
+  .overview-box
+    .overview-box-header.no-filter
+      .overview-box-heading
+        h2
+          span.glyphicon.glyphicon-envelope
+          span.text
+            = t '.edit'
+
+      .overview-box-action
+        = link_to t('.back'), <%= "admin_#{plural_table_name}_path" %>, class: 'btn btn-back'
+        = f.button :submit, class: 'btn btn-primary'
+
+  .row
+    .col-md-12
+      = render 'admin/partials/form_errors', f: f
+      = render 'form', f: f

@@ -1,0 +1,29 @@
+.overview-box
+  .overview-box-header.no-filter
+
+    .overview-box-heading
+      h2
+        span.glyphicon.glyphicon-envelope
+        span.text = t '.list'
+
+    .overview-box-action
+      = link_to t('.create'), <%= "new_admin_#{singular_table_name}_path" %>,
+        class: 'btn btn-success pull-right'
+
+  .overview-box-content
+    .row
+      .col-md-12
+        table.users.table.table-overview
+          thead
+            tr
+              th = <%= "#{singular_table_name.camelize}.human_attribute_name :id" %>
+              <%- for attribute in attributes -%>
+              th = <%= "#{singular_table_name.camelize}.human_attribute_name :#{attribute.type}" %>
+              <%- end -%>
+              th = <%= "#{singular_table_name.camelize}.human_attribute_name :created_at" %>
+              th
+          tbody
+            = render collection.any? ? collection : 'empty'
+
+.paginator
+  = paginate collection.object

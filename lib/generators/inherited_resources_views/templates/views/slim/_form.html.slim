@@ -1,0 +1,13 @@
+.row
+  .col-md-10.body
+    .row
+      .col-md-8
+        .row
+          .col-md-12
+            h3 = t '.main'
+        .row
+          <%- for attribute in attributes -%>
+          .col-md-12 = f.input <%= ":#{attribute.type}" %>
+          <%- end -%>
+
+= overview_box_submit f

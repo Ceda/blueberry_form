@@ -1,0 +1,7 @@
+= simple_form_for <%= "@#{singular_table_name}" %> || <%= "#{singular_table_name.camelize}.new" %>, remote: true do |f|
+  .<%= "#{singular_table_name}" %>-form-wrapper
+<% for attribute in attributes -%>
+    = f.input :<%= attribute.name %>
+<% end -%>
+    .actions
+      = f.submit t('submit')

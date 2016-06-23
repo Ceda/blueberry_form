@@ -1,0 +1,14 @@
+tr<%= ".#{singular_table_name}" %>  id=<%= "#{singular_table_name}.id" %>
+  td = <%= "#{singular_table_name}.id" %>
+  <%- for attribute in attributes -%>
+  <%- if attribute.to_s == 'active' -%>
+  td.text-center class=s_w_bool("#{singular_table_name}.#{attribute.type}")
+    span.glyphicon class=glyph_bool("#{singular_table_name}.#{attribute.type}")
+  <%- else -%>
+  td = <%= "#{singular_table_name}.#{attribute.type}" %>
+  <%- end -%>
+  <%- end -%>
+  td = l <%= "#{singular_table_name}.created_at" %>, format: :short
+
+  td.actions.text-right
+    = render 'admin/partials/standard_actions', resource: <%= "#{singular_table_name}" %>

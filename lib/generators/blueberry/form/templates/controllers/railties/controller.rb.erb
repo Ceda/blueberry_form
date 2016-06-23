@@ -1,0 +1,21 @@
+<% module_namespacing do -%>
+class <%= controller_class_name %>Controller < <%= parent_controller_class_name %>Controller
+  def create
+    @<%= singular_table_name %> = <%= orm_class.build class_name %> <%="#{singular_table_name}_params"%>
+
+    if @<%= orm_instance.save %>
+      @<%= singular_table_name %> = <%= orm_class.build class_name %>
+    end
+  end
+
+  private
+
+  def <%= "#{singular_table_name}_params" %>
+    <%- if attributes_names.empty? -%>
+    params[<%= ":#{singular_table_name}" %>]
+    <%- else -%>
+    params.require(<%= ":#{singular_table_name}" %>).permit(<%= attributes_names.map { |name| ":#{name}" }.join(', ') %>)
+    <%- end -%>
+  end
+end
+<% end -%>
