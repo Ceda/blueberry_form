@@ -1,0 +1,106 @@
+#!/usr/bin/env ruby
+require 'optparse'
+
+OptionParser.new do |o|
+  o.banner = "Usage: create-pipeline.rb [options]"
+  o.on('-dt', 'Add ruby-rake-deploy-tasks buildpack and set DEPLOY_TASKS=db:migrate') { |b| $deploy_tasks = b }
+  o.on('-ms', 'Run migration and seed for all apps') { |b| $migration = b }
+  o.on('-c collaborators', 'Set collaborators emails') { |b| $users = b }
+  o.on('-o OWNER', 'Set owner email - it will be transfer to this user') { |owner| $owner = owner }
+  o.on('-h') { puts o; exit }
+end.parse!
+
+class String
+  def colorize(color_code)
+    "\e[#{color_code}m#{self}\e[0m"
+  end
+  def red
+    colorize(31)
+  end
+end
+
+def print_message(string)
+  STDOUT.print "\n"
+  STDOUT.print "".center(70, '-').upcase.red
+  STDOUT.print "\n"
+  STDOUT.print string.center(70, ' ').upcase
+  STDOUT.print "\n"
+  STDOUT.print "".center(70, '-').upcase.red
+  STDOUT.print "\n"
+end
+
+class Hash
+  def without(*keys)
+    cpy = self.dup
+    keys.each { |key| cpy.delete(key) }
+    cpy
+  end
+end
+
+unless ARGV[0]
+  puts 'Use create-pipeline.rb APP_NAME -ms -c "email@mail.com email2@email.com" -o owner@email.com -dt'
+  puts 'Or create-pipeline.rb -h for help'
+  exit
+end
+
+app_name = ARGV[0].gsub('.', '-')
+
+domains = {
+  'production': "#{app_name}-production",
+  'staging': "#{app_name}-staging",
+  'integration': "#{app_name}-integration",
+}
+
+owner = $owner || 'jbrhel@blueberryapps.com'
+users = $users ? $users.split(' ') : %w(pleskac@gmail.com jbrhel@blueberryapps.com mmagnusek@blueberryapps.com jchrtek@blueberryapps.com ahencze@blueberryapps.com)
+
+if $migration
+  puts print_message 'Migrate and seed apps'
+
+  domains.each do |_, domain|
+    puts `heroku run rake db:migrate db:seed --app "#{domain}"`
+  end
+
+else
+
+  puts print_message 'Creating apps'
+
+  domains.each do |_, domain|
+    puts `heroku create "#{domain}"`
+  end
+
+  puts print_message'Creating pipeline'
+
+  puts `heroku pipelines:create -a #{domains[:production]} #{app_name} -s production`
+
+  puts print_message 'Adding apps to pipeline'
+
+  domains.without(:production).map do |env, domain|
+    env = :production if env == :integration
+    puts `heroku pipelines:add -a "#{domain}" "#{app_name}" -s "#{env}"`
+  end
+
+  puts print_message 'Setting up access for apps'
+
+  users.map do |user|
+    domains.map do |_, domain|
+      puts `heroku access:add "#{user}" --app "#{domain}"`
+    end
+  end
+
+  if $deploy_tasks
+    puts print_message 'Add deploy tasks buildpacks'
+
+    domains.map do |_, domain|
+      puts `heroku buildpacks:add heroku/ruby --app "#{domain}"`
+      puts `heroku buildpacks:add https://github.com/gunpowderlabs/buildpack-ruby-rake-deploy-tasks --app "#{domain}"`
+      puts `heroku config:set DEPLOY_TASKS='db:migrate' --app "#{domain}"`
+    end
+  end
+
+  puts print_message 'Transfer ownership to jbrhel@blueberryapps.com'
+
+  domains.map do |_, domain|
+    puts `heroku apps:transfer "#{owner}" --app "#{domain}"`
+  end
+end
