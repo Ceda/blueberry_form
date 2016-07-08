@@ -46,9 +46,9 @@ end
 app_name = ARGV[0].gsub('.', '-')
 
 domains = {
-  'production': "#{app_name}-production",
-  'staging': "#{app_name}-staging",
-  'integration': "#{app_name}-integration",
+  production: "#{app_name}-production",
+  staging: "#{app_name}-staging",
+  integration: "#{app_name}-integration",
 }
 
 owner = $owner || 'jbrhel@blueberryapps.com'
